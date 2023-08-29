@@ -1,0 +1,99 @@
+<!DOCTYPE html> 
+<html> 
+  
+<head> 
+    <title>Read Text File</title> 
+</head> 
+  
+<body> 
+    <input type="file" name="inputfile"
+            id="inputfile"> 
+    <br> 
+   
+    <pre id="output"></pre> 
+      
+    <script type="text/javascript"> 
+        function isEmpty(obj) {
+            for(var prop in obj) {
+                if(obj.hasOwnProperty(prop))
+                    return false;
+            }
+
+            return true;
+        }
+    
+        function downloadString(text) {
+          var fileName = "Converted.csv";
+          var fileType = "text/csv";
+          var blob = new Blob([text], { type: fileType });
+
+          var a = document.createElement('a');
+          a.download = fileName;
+          a.href = URL.createObjectURL(blob);
+          a.dataset.downloadurl = [fileType, a.download, a.href].join(':');
+          a.style.display = "none";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function() { URL.revokeObjectURL(a.href); }, 1500);
+        }
+    
+        var keys = new Set();
+        var addresses = [];
+        document.getElementById('inputfile') 
+            .addEventListener('change', function() { 
+              
+              
+
+            var fr=new FileReader(); 
+            fr.onload=function(){ 
+				keys = new Set();
+				addresses = [];
+                console.log(fr.result);
+                lines = fr.result.split("\n");
+                var address = {};
+                lines.forEach(function(line) {
+                  if (line.length > 4) {
+                    kvp = line.split(": ");
+                    k = kvp[0];
+                    if (!keys.has(k)) {
+                      keys.add(k);
+                    }
+                    v = kvp.slice(1, kvp.length).join(": ");
+                    address[k] = v.trim();
+                  } else {
+                    addresses.push(address);
+                    address = {};
+                  }
+                })
+                console.log(addresses); 
+                var str = "";
+                var s = "";
+                keys.forEach(function(key) {
+                  s += key + ";";
+                })
+                str += s + "\n";
+                addresses.forEach(function(address) {
+                  if (!isEmpty(address)) {
+                  s = "";
+                  keys.forEach(function(key) {
+                    if (address[key] != undefined) {
+                      s += address[key];
+                    }
+                    s += ";";
+                  })
+                  str += s + "\n";
+                  }
+                })
+                downloadString(str);
+                
+            }
+              
+            fr.readAsText(this.files[0]); 
+        }) 
+        
+
+    </script> 
+</body> 
+  
+</html> 
